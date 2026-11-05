@@ -1,52 +1,69 @@
 # Abhinav AI — Digital Twin & Interactive Portfolio
 
-An autonomous AI chatbot and digital twin representing **Abhinav Kumar Singh** (Full Stack Developer & 2026 B.Tech IT graduate). Built with Next.js, React, and Google Gemini API (Flash).
+[![Live Demo](https://img.shields.io/badge/Live_Demo-abhinav--ai--twin.vercel.app-2ea44f?style=for-the-badge&logo=vercel)](https://abhinav-ai-twin.vercel.app)
+[![Portfolio](https://img.shields.io/badge/Portfolio-Live_Site-0969da?style=for-the-badge&logo=google-chrome)](https://abhinavkrsingh-portfolio.vercel.app/)
+[![Next.js](https://img.shields.io/badge/Next.js-14+-000000?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Google Gemini API](https://img.shields.io/badge/Google_Gemini-Flash_AI-8e75ff?style=for-the-badge&logo=google)](https://ai.google.dev/)
+
+An autonomous AI Digital Twin representing **Abhinav Kumar Singh** (Full Stack Developer & B.Tech IT Graduate from Netaji Subhash Engineering College, Kolkata; Ex-Intern at EasyInsights Pvt. Ltd.).
+
+Built with **Next.js 14**, **React 18**, and **Google Gemini API** with an intelligent multi-model cascade architecture.
 
 ---
 
-## 🚀 Features
+## 🌟 Key Features
 
-- **Grounded AI Digital Twin:** Speaks in the first person ("I built...", "During my internship at EasyInsights...") with factual accuracy based on actual production code, repositories, and architecture.
-- **Official Document Access:**
-  - 📥 **Resume PDF Download:** Directly downloadable from the UI or via AI prompt.
-  - 📜 **EasyInsights Internship Offer Letter:** Downloadable and viewable for verification.
-- **Interactive UI:** Dark mode ChatGPT/Gemini-style layout with suggested interview prompt chips.
-- **100% Free Stack:** Uses Google Gemini 1.5/2.0 Flash via Google AI Studio free tier (no credit card or paid tiers needed).
-
----
-
-## 🛠️ Quick Start
-
-### 1. Configure Your Gemini API Key
-Add your API key copied from [Google AI Studio](https://aistudio.google.com/apikey) to `.env.local`:
-
-```bash
-GEMINI_API_KEY=your_api_key_here
-```
-*(Or paste it directly into the browser settings modal on first load).*
-
-### 2. Run Locally
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+- 🤖 **Grounded AI Persona:** Speaks authentically in the first person (`"I am Abhinav..."`, `"I built..."`) with full factual grounding in production backend systems, data pipelines, and personal projects.
+- ⚡ **Production Engineering Highlights:**
+  - **RabbitMQ Automation & Telegram Bot:** Autonomous queue depth monitoring, worker bottleneck detection, and live error alerting for distributed microservices.
+  - **Full Funnel Marketing Analytics:** Interactive dashboards, Django REST APIs, and PostHog user journey tracking.
+  - **20MB Chunk CSV Upload Engine:** Client-side slice validation with server-side batch ingestion.
+- 🛠️ **Multi-Model AI Cascade:** Resilient backend cascading across Google Gemini text generation models (`gemini-3.7-flash`, `gemini-3.6-flash`, `gemini-3.5-flash`, `gemini-3.1-flash-lite`) with automated backoff for 99.9% uptime.
+- 📄 **1-Click Official Documents:** Direct downloads for updated **Resume (PDF)** and verified **EasyInsights Offer Letter (PDF)**.
+- 🎨 **Modern Executive UI:** Dark glassmorphic interface, segmented prompt categories (`Top Picks`, `Automation`, `EasyInsights`, `Projects`), 1-click clipboard copy, and stop/pause generation controls.
 
 ---
 
-## 🌐 1-Click Free Deployment to Vercel
+## 🛠️ Tech Stack
 
-1. Push this folder to your GitHub (`CodeMaestro-04/abhinav-ai`):
+- **Frontend & Server:** Next.js 14 (App Router), React 18
+- **AI Integration:** Google Gemini API (`@google/generative-ai`)
+- **Styling:** Custom Modern CSS3 with CSS Variables & Glassmorphism
+- **Icons & Markdown:** `lucide-react`, `marked`
+- **Deployment:** Vercel
+
+---
+
+## 🚀 Local Development
+
+1. **Clone the repository:**
    ```bash
-   git init
-   git add .
-   git commit -m "Initial commit of Abhinav AI Digital Twin"
-   git remote add origin https://github.com/CodeMaestro-04/abhinav-ai.git
-   git push -u origin main
+   git clone https://github.com/CodeMaestro-04/abhinav-ai.git
+   cd abhinav-ai
    ```
-2. Go to [Vercel](https://vercel.com) and click **"Add New Project"**.
-3. Import your `abhinav-ai` repository.
-4. Add the Environment Variable:
-   - `GEMINI_API_KEY` = *your Gemini key*
-5. Click **Deploy**!
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment Variables:**
+   Create a `.env.local` file:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key_from_google_ai_studio
+   ```
+
+4. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 👨‍💻 Connect with Abhinav Kumar Singh
+
+- **Portfolio:** [abhinavkrsingh-portfolio.vercel.app](https://abhinavkrsingh-portfolio.vercel.app/)
+- **GitHub:** [@CodeMaestro-04](https://github.com/CodeMaestro-04)
+- **Email:** [abhinavkrsingh83@gmail.com](mailto:abhinavkrsingh83@gmail.com)
+- **Location:** Dhanbad, Jharkhand, India
