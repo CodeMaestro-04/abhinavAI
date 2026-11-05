@@ -49,6 +49,7 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const textareaRef = useRef(null);
   const abortControllerRef = useRef(null);
 
@@ -107,7 +108,13 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Only auto-scroll when user or AI sends a new message (never on initial mount)
+    if (messages.length > 1 && messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [messages, loading]);
 
   const handleSend = async (customPrompt) => {
@@ -489,7 +496,7 @@ export default function Home() {
         </header>
 
         {/* Messages Container */}
-        <div className="messages-container">
+        <div className="messages-container" ref={messagesContainerRef}>
           {/* Conversation Messages */}
           {messages.map((msg, index) => (
             <div key={index} className={`message-row ${msg.role}`}>
