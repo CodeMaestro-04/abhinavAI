@@ -45,7 +45,7 @@ export default function Home() {
   const [showContactModal, setShowContactModal] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
   const [copiedMsgIdx, setCopiedMsgIdx] = useState(null);
-  const [activeTab, setActiveTab] = useState("top");
+  const [activeTab, setActiveTab] = useState("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const messagesEndRef = useRef(null);
@@ -215,12 +215,16 @@ export default function Home() {
 
   // Structured categories to prevent sidebar clutter
   const categories = {
-    top: {
-      name: "⭐ Top Picks",
+    overview: {
+      name: "⭐ Overview",
       questions: [
         {
           label: "⚡ Tell me about yourself (30-second pitch)",
           prompt: "Tell me about yourself (30-second pitch)",
+        },
+        {
+          label: "🌐 Can you share your live portfolio link?",
+          prompt: "Can you share your live portfolio website link and tell me about it?",
         },
         {
           label: "🐰 RabbitMQ Telegram Bot Automation",
@@ -258,7 +262,7 @@ export default function Home() {
       ],
     },
     experience: {
-      name: "💼 EasyInsights",
+      name: "💼 Experience",
       questions: [
         {
           label: "📊 How did you build the Full Funnel Overview dashboard?",
@@ -744,17 +748,17 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Offer Letter link in modal */}
+              {/* Resume download link in modal */}
               <div style={{ marginTop: "6px", paddingTop: "10px", borderTop: "1px solid var(--border-color)" }}>
                 <a
-                  href="/offer_letter.pdf"
-                  download="EasyInsights_Offer_Letter.pdf"
+                  href="/resume.pdf"
+                  download="Abhinav_Kumar_Singh_Resume.pdf"
                   target="_blank"
                   rel="noreferrer"
-                  className="btn-secondary"
-                  style={{ width: "100%", justifyContent: "center", fontSize: "0.82rem" }}
+                  className="btn-primary"
+                  style={{ width: "100%", justifyContent: "center", fontSize: "0.84rem" }}
                 >
-                  <FileText size={14} /> Download EasyInsights Offer Letter (PDF)
+                  <Download size={14} /> Download Resume (PDF)
                 </a>
               </div>
             </div>
