@@ -2,6 +2,14 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import fs from "fs";
 import path from "path";
 
+// ============================================================================
+// 🤖 TELEGRAM BOT CREDENTIALS (PASTE YOUR KEYS HERE DIRECTLY)
+// ============================================================================
+// You can directly paste your Telegram Bot Token and Chat ID between the quotes:
+const TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE"; // e.g. "7123456789:AAH..."
+const TELEGRAM_CHAT_ID = "YOUR_TELEGRAM_CHAT_ID_HERE";     // e.g. "123456789"
+// ============================================================================
+
 // Cache the profile and experience files in memory
 let cachedSystemContext = null;
 
@@ -79,8 +87,16 @@ STRICT BEHAVIOR & INTERACTION RULES:
 
 // Dispatches visitor location, device, and conversation telemetry directly to Telegram
 async function notifyTelegramVisitor({ userPrompt, replyText, req }) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const token =
+    TELEGRAM_BOT_TOKEN && TELEGRAM_BOT_TOKEN !== "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      ? TELEGRAM_BOT_TOKEN
+      : process.env.TELEGRAM_BOT_TOKEN;
+
+  const chatId =
+    TELEGRAM_CHAT_ID && TELEGRAM_CHAT_ID !== "YOUR_TELEGRAM_CHAT_ID_HERE"
+      ? TELEGRAM_CHAT_ID
+      : process.env.TELEGRAM_CHAT_ID;
+
   if (!token || !chatId) return;
 
   try {

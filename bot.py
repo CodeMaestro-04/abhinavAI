@@ -19,8 +19,19 @@ from dotenv import load_dotenv
 # Load credentials from .env.local or environment
 load_dotenv(".env.local")
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+# ============================================================================
+# 🤖 TELEGRAM BOT CREDENTIALS (PASTE YOUR KEYS HERE DIRECTLY)
+# ============================================================================
+# You can directly paste your Telegram Bot Token and Chat ID between the quotes:
+TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE"  # e.g. "7123456789:AAH..."
+TELEGRAM_CHAT_ID = "YOUR_TELEGRAM_CHAT_ID_HERE"      # e.g. "123456789"
+# ============================================================================
+
+# Fallback to environment variables if left as placeholder
+if not TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_TOKEN == "YOUR_TELEGRAM_BOT_TOKEN_HERE":
+    TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+if not TELEGRAM_CHAT_ID or TELEGRAM_CHAT_ID == "YOUR_TELEGRAM_CHAT_ID_HERE":
+    TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 TELEGRAM_API_URL = "https://api.telegram.org/bot"
 
