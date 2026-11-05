@@ -27,6 +27,7 @@ import {
   MessageSquare,
   RotateCcw,
   CornerDownLeft,
+  Menu,
 } from "lucide-react";
 
 export default function Home() {
@@ -45,6 +46,7 @@ export default function Home() {
   const [copiedField, setCopiedField] = useState(null);
   const [copiedMsgIdx, setCopiedMsgIdx] = useState(null);
   const [activeTab, setActiveTab] = useState("top");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -199,7 +201,15 @@ export default function Home() {
   };
 
   const renderMarkdown = (content) => {
-    const rawHtml = marked.parse(content || "");
+    let rawHtml = marked.parse(content || "");
+    // Ensure ALL anchor links open in a new tab so chat session is never lost
+    rawHtml = rawHtml.replace(/<a\s+(?:[^>]*?\s+)?href="([^"]*)"([^>]*)>/gi, (match, href, rest) => {
+      const cleanRest = rest
+        .replace(/target="[^"]*"/gi, "")
+        .replace(/rel="[^"]*"/gi, "")
+        .trim();
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer"${cleanRest ? " " + cleanRest : ""}>`;
+    });
     return { __html: rawHtml };
   };
 
@@ -289,8 +299,20 @@ export default function Home() {
 
   return (
     <div className="layout-container">
-      {/* 1. Sleek, Uncluttered Sidebar */}
-      <aside className="sidebar">
+      {/* 1. Sleek, Uncluttered Sidebar (Responsive Drawer on Mobile) */}
+      <aside className={`sidebar ${mobileMenuOpen ? "mobile-open" : ""}`}>
+        {/* Mobile-Only Close Header */}
+        <div className="mobile-sidebar-header">
+          <span className="mobile-sidebar-title">Menu & Profile</span>
+          <button
+            className="mobile-sidebar-close"
+            onClick={() => setMobileMenuOpen(false)}
+            title="Close menu"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
         {/* Profile Card */}
         <div className="profile-card">
           <div className="avatar-wrapper">
@@ -349,7 +371,10 @@ export default function Home() {
               <button
                 key={idx}
                 className="prompt-pill"
-                onClick={() => handleSend(q.prompt)}
+                onClick={() => {
+                  handleSend(q.prompt);
+                  setMobileMenuOpen(false);
+                }}
               >
                 {q.label}
               </button>
@@ -417,11 +442,24 @@ export default function Home() {
         </div>
       </aside>
 
+      {/* Mobile Drawer Backdrop */}
+      <div
+        className={`sidebar-backdrop ${mobileMenuOpen ? "active" : ""}`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+
       {/* 2. Main Chat View */}
       <main className="chat-main">
         {/* Header */}
         <header className="chat-header">
           <div className="header-title-box">
+            <button
+              className="mobile-hamburger-btn"
+              onClick={() => setMobileMenuOpen(true)}
+              title="Open Navigation Menu & Profile"
+            >
+              <Menu size={18} />
+            </button>
             <span className="status-dot"></span>
             <div>
               <div className="header-title">Abhinav AI • Digital Twin</div>
