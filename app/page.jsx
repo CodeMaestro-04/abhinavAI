@@ -148,6 +148,11 @@ export default function Home() {
         body: JSON.stringify({
           messages: newMessages,
           apiKey: apiKey || undefined,
+          meta: {
+            timezone: typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "",
+            screen: typeof window !== "undefined" ? `${window.screen.width}x${window.screen.height}` : "",
+            referrer: typeof document !== "undefined" ? (document.referrer || "Direct Visit") : "Direct Visit",
+          },
         }),
       });
 

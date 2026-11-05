@@ -81,19 +81,41 @@ STRICT BEHAVIOR & INTERACTION RULES:
   }
 }
 
+// In-memory cache to prevent duplicate alerts if multiple calls occur in rapid succession
+const recentAlertsCache = new Map();
+
 // Dispatches visitor location, device, and conversation telemetry directly to Telegram
-async function notifyTelegramVisitor({ userPrompt, replyText, req }) {
+async function notifyTelegramVisitor({ userPrompt, replyText, req, meta }) {
   const token = TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
   const chatId = TELEGRAM_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) return;
 
   try {
     const rawIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "Local/Unknown IP";
+
+    // Deduplication check: prevent sending duplicate alerts within 5 seconds
+    const dedupKey = `${rawIp}:${userPrompt?.trim()}`;
+    const now = Date.now();
+    if (recentAlertsCache.has(dedupKey)) {
+      const lastSent = recentAlertsCache.get(dedupKey);
+      if (now - lastSent < 6000) {
+        return; // Skip duplicate notification
+      }
+    }
+    recentAlertsCache.set(dedupKey, now);
+
+    // Clean up cache periodically
+    if (recentAlertsCache.size > 200) {
+      for (const [k, v] of recentAlertsCache.entries()) {
+        if (now - v > 60000) recentAlertsCache.delete(k);
+      }
+    }
+
     const city = req.headers.get("x-vercel-ip-city") || "";
     const region = req.headers.get("x-vercel-ip-country-region") || "";
     const country = req.headers.get("x-vercel-ip-country") || "";
     const userAgent = req.headers.get("user-agent") || "Unknown Browser";
-    const referer = req.headers.get("referer") || "Direct Visit";
+    const referer = meta?.referrer || req.headers.get("referer") || "Direct Visit";
 
     // Clean device name
     let device = "Desktop / Laptop";
@@ -103,8 +125,20 @@ async function notifyTelegramVisitor({ userPrompt, replyText, req }) {
     else if (/windows/i.test(userAgent)) device = "Windows PC";
     else if (/linux/i.test(userAgent)) device = "Linux Workstation";
 
-    const locationParts = [city, region, country].filter(Boolean);
-    const locationStr = locationParts.length > 0 ? locationParts.join(", ") : "Unknown Location";
+    if (meta?.screen) {
+      device += ` (${meta.screen})`;
+    }
+
+    // Format location nicely (handling Delhi NCR routing)
+    let locationStr = "";
+    const lowerCity = city.toLowerCase();
+    if (["faridabad", "noida", "gurgaon", "gurugram", "ghaziabad"].includes(lowerCity)) {
+      locationStr = `Delhi NCR (${city}), ${region || "India"}`;
+    } else if (city) {
+      locationStr = [city, region, country].filter(Boolean).join(", ");
+    } else {
+      locationStr = country || "Unknown Location";
+    }
 
     const escapeHtml = (str) =>
       (str || "")
@@ -140,7 +174,7 @@ async function notifyTelegramVisitor({ userPrompt, replyText, req }) {
 
 export async function POST(req) {
   try {
-    const { messages, apiKey: clientApiKey } = await req.json();
+    const { messages, apiKey: clientApiKey, meta } = await req.json();
 
     const apiKey = process.env.GEMINI_API_KEY || clientApiKey;
 
@@ -255,7 +289,7 @@ export async function POST(req) {
     }
 
     // Automatically send visitor location, device, and conversation alert to Telegram
-    notifyTelegramVisitor({ userPrompt: lastMessage, replyText, req });
+    notifyTelegramVisitor({ userPrompt: lastMessage, replyText, req, meta });
 
     return Response.json({ reply: replyText });
   } catch (error) {

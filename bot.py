@@ -57,9 +57,10 @@ def send_telegram_alert(
 
     url = f"{TELEGRAM_API_URL}{TELEGRAM_BOT_TOKEN}/sendMessage"
     
+    loc_display = f"{city}, {country}" if country and country not in city else city
     text = (
         "🚨 <b>New Visitor on Abhinav AI!</b>\n\n"
-        f"📍 <b>Location:</b> {city}, {country} (IP: <code>{ip}</code>)\n"
+        f"📍 <b>Location:</b> {loc_display} (IP: <code>{ip}</code>)\n"
         f"📱 <b>Device:</b> {device}\n"
         f"🔗 <b>Source:</b> {referrer}\n\n"
         f"💬 <b>Question Asked:</b>\n"
@@ -93,21 +94,45 @@ def send_telegram_alert(
         return False
 
 
+def get_live_location():
+    """Detects actual machine IP and live city/region for the test run."""
+    try:
+        req = urllib.request.Request(
+            "https://ipapi.co/json/",
+            headers={"User-Agent": "Mozilla/5.0"}
+        )
+        with urllib.request.urlopen(req, timeout=4) as res:
+            data = json.loads(res.read().decode("utf-8"))
+            city = data.get("city") or "Delhi"
+            region = data.get("region") or ""
+            country = data.get("country_name") or "India"
+            ip = data.get("ip") or "127.0.0.1"
+            org = data.get("org") or ""
+            loc_label = f"{city}, {region}, {country}" if region else f"{city}, {country}"
+            if org:
+                loc_label += f" ({org})"
+            return {"location": loc_label, "ip": ip}
+    except Exception:
+        return {"location": "Delhi, India", "ip": "Local IP"}
+
+
 def test_connection():
-    """Verifies your bot token and chat ID with a test notification."""
-    print("🤖 Testing Telegram Bot connection...")
+    """Verifies your bot token and chat ID with a test notification using real live location."""
+    print("🤖 Testing Telegram Bot connection with live location...")
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         print("❌ Missing credentials. Please set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID once at the top of app/api/chat/route.js")
         return False
 
+    info = get_live_location()
+
     return send_telegram_alert(
         prompt="[TEST] What technical projects did Abhinav build at EasyInsights?",
         reply="I built a real-time RabbitMQ queue monitoring bot, Full Funnel marketing dashboards, and chunked CSV upload pipelines.",
-        city="Kolkata",
-        country="India",
-        device="MacBook / Chrome",
-        referrer="https://linkedin.com",
-        ip="127.0.0.1"
+        city=info["location"],
+        country="",
+        device="MacBook / Chrome (Local Test)",
+        referrer="Local Terminal test",
+        ip=info["ip"]
     )
 
 
