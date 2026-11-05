@@ -26,6 +26,9 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  position: fixed;
+  inset: 0;
+  width: 100%;
   background-color: var(--bg-main);
   color: var(--text-main);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -1175,8 +1178,8 @@ body {
   transition: opacity 0.25s ease;
 }
 
-/* Responsive Alignment for Smartphones & Tablets (<= 900px) */
-@media (max-width: 900px) {
+/* Responsive Alignment for Smartphones, Mobile Desktop Mode & Tablets (<= 1024px) */
+@media (max-width: 1024px) {
   .mobile-hamburger-btn {
     display: flex;
   }
@@ -1231,7 +1234,7 @@ body {
   }
 
   .messages-container {
-    padding: 12px 14px 18px;
+    padding: 12px 14px 20px;
     gap: 12px;
     max-width: 100%;
     width: 100%;
@@ -1247,11 +1250,12 @@ body {
     line-height: 1.55;
   }
 
+  /* Elevated chat input bar on smartphones for easy access & clear of gesture pill */
   .chat-input-container {
     flex-shrink: 0;
-    padding: 8px 14px;
-    padding-bottom: max(28px, calc(env(safe-area-inset-bottom) + 20px));
-    margin-bottom: 6px;
+    padding: 10px 16px;
+    padding-bottom: max(38px, calc(env(safe-area-inset-bottom) + 26px));
+    margin-bottom: 12px;
     max-width: 100%;
     width: 100%;
     z-index: 20;

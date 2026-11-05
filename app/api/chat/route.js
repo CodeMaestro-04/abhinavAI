@@ -77,6 +77,63 @@ STRICT BEHAVIOR & INTERACTION RULES:
   }
 }
 
+// Dispatches visitor location, device, and conversation telemetry directly to Telegram
+async function notifyTelegramVisitor({ userPrompt, replyText, req }) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+
+  try {
+    const rawIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "Local/Unknown IP";
+    const city = req.headers.get("x-vercel-ip-city") || "";
+    const region = req.headers.get("x-vercel-ip-country-region") || "";
+    const country = req.headers.get("x-vercel-ip-country") || "";
+    const userAgent = req.headers.get("user-agent") || "Unknown Browser";
+    const referer = req.headers.get("referer") || "Direct Visit";
+
+    // Clean device name
+    let device = "Desktop / Laptop";
+    if (/android/i.test(userAgent)) device = "Android Smartphone";
+    else if (/iphone|ipad|ipod/i.test(userAgent)) device = "iOS iPhone / iPad";
+    else if (/macintosh/i.test(userAgent)) device = "MacBook / Mac";
+    else if (/windows/i.test(userAgent)) device = "Windows PC";
+    else if (/linux/i.test(userAgent)) device = "Linux Workstation";
+
+    const locationParts = [city, region, country].filter(Boolean);
+    const locationStr = locationParts.length > 0 ? locationParts.join(", ") : "Unknown Location";
+
+    const escapeHtml = (str) =>
+      (str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+    const preview = replyText ? replyText.slice(0, 250) + (replyText.length > 250 ? "..." : "") : "";
+
+    const text =
+      `🚨 <b>New Visitor on Abhinav AI!</b>\n\n` +
+      `📍 <b>Location:</b> ${locationStr} (IP: <code>${rawIp}</code>)\n` +
+      `📱 <b>Device:</b> ${device}\n` +
+      `🔗 <b>Source:</b> ${escapeHtml(referer)}\n\n` +
+      `💬 <b>Question Asked:</b>\n<i>"${escapeHtml(userPrompt)}"</i>\n\n` +
+      (preview ? `🤖 <b>AI Response Preview:</b>\n${escapeHtml(preview)}` : "");
+
+    // Fire non-blocking Telegram send
+    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        parse_mode: "HTML",
+        disable_web_page_preview: true,
+      }),
+    }).catch((err) => console.warn("Telegram alert error:", err.message));
+  } catch (err) {
+    console.warn("Could not send Telegram notification:", err.message);
+  }
+}
+
 export async function POST(req) {
   try {
     const { messages, apiKey: clientApiKey } = await req.json();
@@ -192,6 +249,9 @@ export async function POST(req) {
     if (!replyText) {
       throw lastError || new Error("All model endpoints busy. Please retry.");
     }
+
+    // Automatically send visitor location, device, and conversation alert to Telegram
+    notifyTelegramVisitor({ userPrompt: lastMessage, replyText, req });
 
     return Response.json({ reply: replyText });
   } catch (error) {
