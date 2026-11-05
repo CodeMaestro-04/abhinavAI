@@ -13,25 +13,30 @@ Captures:
 
 import os
 import sys
-import requests
-from dotenv import load_dotenv
+import re
+import json
+import urllib.request
+import urllib.error
 
-# Load credentials from .env.local or environment
-load_dotenv(".env.local")
+# Automatically reads the keys you set once at the top of app/api/chat/route.js
+def _load_credentials():
+    token, chat_id = "", ""
+    route_file = os.path.join(os.path.dirname(__file__), "app", "api", "chat", "route.js")
+    if os.path.exists(route_file):
+        try:
+            with open(route_file, "r", encoding="utf-8") as f:
+                content = f.read()
+            m_token = re.search(r'const\s+TELEGRAM_BOT_TOKEN\s*=\s*["\']([^"\']*)["\']', content)
+            m_chat = re.search(r'const\s+TELEGRAM_CHAT_ID\s*=\s*["\']([^"\']*)["\']', content)
+            if m_token:
+                token = m_token.group(1).strip()
+            if m_chat:
+                chat_id = m_chat.group(1).strip()
+        except Exception:
+            pass
+    return token or os.getenv("TELEGRAM_BOT_TOKEN", ""), chat_id or os.getenv("TELEGRAM_CHAT_ID", "")
 
-# ============================================================================
-# 🤖 TELEGRAM BOT CREDENTIALS (PASTE YOUR KEYS HERE DIRECTLY)
-# ============================================================================
-# You can directly paste your Telegram Bot Token and Chat ID between the quotes:
-TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE"  # e.g. "7123456789:AAH..."
-TELEGRAM_CHAT_ID = "YOUR_TELEGRAM_CHAT_ID_HERE"      # e.g. "123456789"
-# ============================================================================
-
-# Fallback to environment variables if left as placeholder
-if not TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_TOKEN == "YOUR_TELEGRAM_BOT_TOKEN_HERE":
-    TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-if not TELEGRAM_CHAT_ID or TELEGRAM_CHAT_ID == "YOUR_TELEGRAM_CHAT_ID_HERE":
-    TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID = _load_credentials()
 
 TELEGRAM_API_URL = "https://api.telegram.org/bot"
 
@@ -47,7 +52,7 @@ def send_telegram_alert(
 ) -> bool:
     """Dispatches a formatted real-time visitor alert to your Telegram."""
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        print("⚠️ Error: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing in .env.local")
+        print("⚠️ Error: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is empty in app/api/chat/route.js")
         return False
 
     url = f"{TELEGRAM_API_URL}{TELEGRAM_BOT_TOKEN}/sendMessage"
@@ -65,18 +70,24 @@ def send_telegram_alert(
         preview = reply[:250] + ("..." if len(reply) > 250 else "")
         text += f"🤖 <b>AI Response Preview:</b>\n{preview}"
 
-    payload = {
+    payload = json.dumps({
         "chat_id": TELEGRAM_CHAT_ID,
         "text": text,
         "parse_mode": "HTML",
         "disable_web_page_preview": True,
-    }
+    }).encode("utf-8")
 
     try:
-        response = requests.post(url, json=payload, timeout=5)
-        response.raise_for_status()
-        print("✓ Visitor alert successfully sent to Telegram!")
-        return True
+        req = urllib.request.Request(
+            url,
+            data=payload,
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=5) as response:
+            if response.status == 200:
+                print("✓ Visitor alert successfully sent to Telegram!")
+                return True
+        return False
     except Exception as e:
         print(f"❌ Failed to send Telegram alert: {e}")
         return False
@@ -86,7 +97,7 @@ def test_connection():
     """Verifies your bot token and chat ID with a test notification."""
     print("🤖 Testing Telegram Bot connection...")
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        print("❌ Missing credentials. Please add TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID to .env.local")
+        print("❌ Missing credentials. Please set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID once at the top of app/api/chat/route.js")
         return False
 
     return send_telegram_alert(
